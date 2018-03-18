@@ -23,6 +23,13 @@ class ContainMatchersTest extends FunSuite with ContainMatchers {
     "timestamp" -> null
   )
 
+  test("containOnly ignores order") {
+    val expected = Seq(row1, row2)
+    val actual = Seq(row2, row1)
+
+    containOnly(expected).apply(actual).matches should be (true)
+  }
+
   test("containInOrderOnly actual has more elements than expected") {
     val expected = Seq(row1)
     val actual = Seq(row1, row2)

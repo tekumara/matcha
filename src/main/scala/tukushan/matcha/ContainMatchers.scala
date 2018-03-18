@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 
 trait ContainMatchers extends Matchers {
 
-  def containInOrderOnly[V <: Any](expected: Seq[Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainInOrderOnly(expected)
+  def containInOrderOnly[V <: Any](expected: Seq[Map[String, V]]): ContainInOrderOnly[V] = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainInOrderOnly(expected)
 
   // same as "contain theSameElementsInOrderAs" but nicer failure messaging. order does matter.
   class ContainInOrderOnly[V <: Any](expected: Seq[Map[String, V]]) extends Matcher[Seq[Map[String, Any]]] {
@@ -35,10 +35,10 @@ trait ContainMatchers extends Matchers {
     }
   }
 
-  def containOnly[V <: Any](expected: Seq[Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainOnly(expected)
+  def containOnly[V <: Any](expected: Seq[Map[String, V]]): ContainOnly[V] = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainOnly(expected)
 
   // converts j.u.Map to scala
-  def containOnlyJavaMaps[V <: Any](expected: Seq[java.util.Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainOnly(expected.map(_.asScala.toMap))
+  def containOnlyJavaMaps[V <: Any](expected: Seq[java.util.Map[String, V]]): ContainOnly[V] = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainOnly(expected.map(_.asScala.toMap))
 
   // same as "contain theSameElementsAs" but nicer failure messaging. order doesn't matter.
   class ContainOnly[V <: Any](expected: Seq[Map[String, V]]) extends Matcher[Seq[Map[String, Any]]] {
@@ -66,7 +66,7 @@ trait ContainMatchers extends Matchers {
     }
   }
 
-  def containAtLeast[V <: Any](expected: Seq[Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainAtLeast(expected)
+  def containAtLeast[V <: Any](expected: Seq[Map[String, V]]): ContainAtLeast[V] = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainAtLeast(expected)
 
   // same as "contain" but nicer failure messaging. order doesn't matter.
   class ContainAtLeast[V <: Any](expected: Seq[Map[String, V]]) extends Matcher[Seq[Map[String, Any]]] {
@@ -86,7 +86,7 @@ trait ContainMatchers extends Matchers {
     }
   }
 
-  def contains[V <: Any](left: Seq[Map[String, Any]], expected: Seq[Map[String, V]]) = {
+  def contains[V <: Any](left: Seq[Map[String, Any]], expected: Seq[Map[String, V]]): MatchResult = {
     val missing = expected.flatMap(row => {
       if (left.contains(row)) {
         None
@@ -103,7 +103,7 @@ trait ContainMatchers extends Matchers {
     )
   }
 
-  def containsInOrder[V <: Any](left: Seq[Map[String, Any]], expected: Seq[Map[String, V]]) = {
+  def containsInOrder[V <: Any](left: Seq[Map[String, Any]], expected: Seq[Map[String, V]]): MatchResult = {
     val missing = expected.flatMap(row => {
       if (left.contains(row)) {
         None
