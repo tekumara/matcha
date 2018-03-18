@@ -9,7 +9,7 @@ trait ContainMatchers extends Matchers {
 
   def containInOrderOnly[V <: Any](expected: Seq[Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainInOrderOnly(expected)
 
-  // same as "theSameElementsInOrderAs" but nicer failure messaging. order does matter.
+  // same as "contain theSameElementsInOrderAs" but nicer failure messaging. order does matter.
   class ContainInOrderOnly[V <: Any](expected: Seq[Map[String, V]]) extends Matcher[Seq[Map[String, Any]]] {
 
     override def apply(left: Seq[Map[String, Any]]): MatchResult = {
@@ -17,14 +17,16 @@ trait ContainMatchers extends Matchers {
       if (left.nonEmpty && left.forall(_.isEmpty)) {
         MatchResult(
           matches = false,
-          s"No results contained the keys ${expected.head.keySet.mkString(",")}. Did you specify a correct header?",
-          "actual contains some of the keys"
+          rawFailureMessage = s"No results contained the keys {0}. Did you specify a correct header?",
+          rawNegatedFailureMessage = "actual contains some of the keys",
+          args = Vector(expected.head.keySet.mkString(","))
         )
       } else if (left.size > expected.size) {
         MatchResult(
           matches = false,
-          s"expecting ${expected.size} results but got the following ${left.size} results $left",
-          "actual contains same number of results as expected"
+          rawFailureMessage = s"expecting {0} results but got the following {1} results {2}",
+          rawNegatedFailureMessage = "actual contains same number of results as expected",
+          args = Vector(expected.size, left.size, left)
         )
       }
       else {
@@ -32,7 +34,6 @@ trait ContainMatchers extends Matchers {
       }
     }
   }
-
 
   def containOnly[V <: Any](expected: Seq[Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainOnly(expected)
 
@@ -47,14 +48,16 @@ trait ContainMatchers extends Matchers {
       if (left.nonEmpty && left.forall(_.isEmpty)) {
         MatchResult(
           matches = false,
-          s"No results contained the keys ${expected.head.keySet.mkString(",")}. Did you specify a correct header?",
-          "actual contains some of the keys"
+          rawFailureMessage = s"No results contained the keys {0}. Did you specify a correct header?",
+          rawNegatedFailureMessage = "actual contains some of the keys",
+          args = Vector(expected.head.keySet.mkString(","))
         )
       } else if (left.size > expected.size) {
         MatchResult(
           matches = false,
-          s"expecting ${expected.size} results but got the following ${left.size} results: \n$left",
-          "actual contains same number of results as expected"
+          rawFailureMessage = s"expecting {0} results but got the following {1} results {2}",
+          rawNegatedFailureMessage = "actual contains same number of results as expected",
+          args = Vector(expected.size, left.size, left)
         )
       }
       else {
@@ -63,7 +66,7 @@ trait ContainMatchers extends Matchers {
     }
   }
 
-  def contain[V <: Any](expected: Seq[Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainAtLeast(expected)
+  def containAtLeast[V <: Any](expected: Seq[Map[String, V]]) = if (expected.isEmpty) throw new Exception("No rows to test") else new ContainAtLeast(expected)
 
   // same as "contain" but nicer failure messaging. order doesn't matter.
   class ContainAtLeast[V <: Any](expected: Seq[Map[String, V]]) extends Matcher[Seq[Map[String, Any]]] {
@@ -72,8 +75,9 @@ trait ContainMatchers extends Matchers {
       if (left.nonEmpty && left.forall(_.isEmpty)) {
         MatchResult(
           matches = false,
-          s"No results contained the keys ${expected.head.keySet.mkString(",")}. Did you specify a header?",
-          "actual contains some of the keys"
+          rawFailureMessage = s"No results contained the keys {0}. Did you specify a correct header?",
+          rawNegatedFailureMessage = "actual contains some of the keys",
+          args = Vector(expected.head.keySet.mkString(","))
         )
       }
       else {
@@ -87,14 +91,15 @@ trait ContainMatchers extends Matchers {
       if (left.contains(row)) {
         None
       } else {
-        Some(row.toString())
+        Some(row)
       }
     })
 
     MatchResult(
-      missing.isEmpty,
-      s"missing ${missing.mkString(", ")} from:\n$left",
-      "actual contains all key/value pairs"
+      matches = missing.isEmpty,
+      rawFailureMessage = s"missing {0} from:\n{1}",
+      rawNegatedFailureMessage = "actual contains all key/value pairs",
+      args = Vector(missing, left)
     )
   }
 
@@ -103,27 +108,28 @@ trait ContainMatchers extends Matchers {
       if (left.contains(row)) {
         None
       } else {
-        Some(row.toString())
+        Some(row)
       }
     })
 
     if (missing.nonEmpty) {
       MatchResult(
         matches = false,
-        s"missing ${missing.mkString(", ")} from:\n$left",
-        "actual contains all key/value pairs"
+        rawFailureMessage = s"missing {0} from:\n{1}",
+        rawNegatedFailureMessage = "actual contains all key/value pairs",
+        args = Vector(missing, left)
       )
     } else {
-      val outOfOrder: Seq[Map[String, V]] = expected.zip(left).filter{ case (expectation, actual) => expectation != actual }.map{ case (expectation, actual) => expectation }
+      val outOfOrder: Seq[Map[String, V]] = expected.zip(left).filter{ case (expectation, actual) => expectation != actual }.map{ case (expectation, _) => expectation }
 
       MatchResult(
         matches = outOfOrder.isEmpty,
-        s"out of order ${outOfOrder.mkString(", ")} in:\n$left",
-        "actual contains all key/value pairs"
+        rawFailureMessage = s"out of order {0} in:\n{1}",
+        rawNegatedFailureMessage = "actual contains all key/value pairs",
+        args = Vector(outOfOrder, left)
       )
     }
 
   }
-
 
 }
